@@ -10,9 +10,11 @@ app.use(express.json());
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  user: process.env.USERNAME,
+  password: process.env.PASSWORD,
+  database: process.env.DB,
+  port:process.env.PORT,
+  ssl:process.env.DB_SSL === 'true' 
 });
 
 // Exemple d'endpoint
