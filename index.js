@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const mysql = require('pg');
+const { Pool } = require('pg'); // 👈 PostgreSQL
 const cors = require('cors');
 
 const app = express();
