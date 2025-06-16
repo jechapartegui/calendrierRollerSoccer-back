@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const db = mysql.createConnection({
+const db = new Pool({
   host: process.env.DB_HOST,
   user: process.env.USERNAME,
   password: process.env.PASSWORD,
