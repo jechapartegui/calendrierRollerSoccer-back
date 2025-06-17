@@ -26,20 +26,21 @@ app.get('/api/listeclub', (req, res) => {
     res.json(results.rows);
   });
 });
-app.post('/api/validcode', (req, res) => {
-  const { id, code } = req.body; // ✅ récupère correctement depuis le JSON du body
 
-  db.query(
-    'SELECT COUNT(id) AS count FROM ptd_clubs WHERE id = ? AND code = ?',
-    [id, code],
-    (err, results) => {
-      if (err) return res.status(500).send(err);
+app.post('/api/validcode', async (req, res) => {
+  const { id, code } = req.body;
 
-      // Renvoie true si 1 résultat, false sinon
-      const isValid = results[0].count === 1;
-      res.json({ valid: isValid });
-    }
-  );
+  try {
+    const result = await db.query(
+      'SELECT COUNT(id) AS count FROM ptd_clubs WHERE id = $1 AND code = $2',
+      [id, code]
+    );
+
+    const isValid = result.rows[0].count === '1'; // Attention : COUNT retourne une string !
+    res.json({ valid: isValid });
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
 });
 
 // Génère les endpoints pour une table
