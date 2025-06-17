@@ -14,7 +14,9 @@ const db = new Pool({
   password: process.env.PASSWORD,
   database: process.env.DB,
   port:process.env.PORT,
-  ssl:process.env.DB_SSL === 'true' 
+   ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // Exemple d'endpoint

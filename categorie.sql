@@ -1,0 +1,11 @@
+CREATE TABLE ptd_categorie (
+  id INTEGER PRIMARY KEY,
+  nom VARCHAR(20) NOT NULL,
+  duree INTEGER NOT NULL DEFAULT 10
+);
+
+INSERT INTO ptd_categorie (id, nom, duree) VALUES
+(1, 'U14', 50),
+(2, 'U19', 70),
+(3, 'N1', 90),
+(4, 'Elite', 90);
