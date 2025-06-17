@@ -23,7 +23,7 @@ const db = new Pool({
 app.get('/api/listeclub', (req, res) => {
   db.query('SELECT id, nom FROM ptd_clubs', (err, results) => {
     if (err) return res.status(500).send(err);
-    res.json(results);
+    res.json(results.rows);
   });
 });
 app.post('/api/validcode', (req, res) => {
@@ -45,41 +45,58 @@ app.post('/api/validcode', (req, res) => {
 // Génère les endpoints pour une table
 function setupTableRoutes(name, fields) {
   const fieldsStr = fields.join(', ');
-  const placeholders = fields.map(() => '?').join(', ');
-  const updateStr = fields.map(f => `${f}=?`).join(', ');
+  const placeholders = fields.map((_, i) => `$${i + 1}`).join(', ');
+  const updateStr = fields.map((f, i) => `${f}=$${i + 1}`).join(', ');
 
-  app.get(`/api/${name}`, (req, res) => {
-    db.query(`SELECT * FROM ptd_${name}`, (err, results) =>
-      err ? res.status(500).send(err) : res.json(results)
-    );
+  app.get(`/api/${name}`, async (req, res) => {
+    try {
+      const result = await db.query(`SELECT * FROM ptd_${name}`);
+      res.json(result.rows);
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
   });
 
-  app.get(`/api/${name}/:id`, (req, res) => {
-    db.query(`SELECT * FROM ptd_${name} WHERE id = ?`, [req.params.id],
-      (err, results) =>
-        err ? res.status(500).send(err) : res.json(results[0] || {})
-    );
+  app.get(`/api/${name}/:id`, async (req, res) => {
+    try {
+      const result = await db.query(`SELECT * FROM ptd_${name} WHERE id = $1`, [req.params.id]);
+      res.json(result.rows[0] || {});
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
   });
 
-  app.post(`/api/${name}`, (req, res) => {
-    const vals = fields.map(f => req.body[f]);
-    db.query(`INSERT INTO ptd_${name} (${fieldsStr}) VALUES (${placeholders})`, vals,
-      (err, result) =>
-        err ? res.status(500).send(err) : res.json({id: result.insertId})
-    );
+  app.post(`/api/${name}`, async (req, res) => {
+    try {
+      const vals = fields.map(f => req.body[f]);
+      const result = await db.query(
+        `INSERT INTO ptd_${name} (${fieldsStr}) VALUES (${placeholders}) RETURNING id`
+        , vals
+      );
+      res.json({ id: result.rows[0].id });
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
   });
 
-  app.put(`/api/${name}/:id`, (req, res) => {
-    const vals = [...fields.map(f => req.body[f]), req.params.id];
-    db.query(`UPDATE ptd_${name} SET ${updateStr} WHERE id = ?`, vals,
-      (err) => err ? res.status(500).send(err) : res.json({updated: true})
-    );
+  app.put(`/api/${name}/:id`, async (req, res) => {
+    try {
+      const vals = fields.map(f => req.body[f]);
+      vals.push(req.params.id);
+      await db.query(`UPDATE ptd_${name} SET ${updateStr} WHERE id = $${vals.length}`, vals);
+      res.json({ updated: true });
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
   });
 
-  app.delete(`/api/${name}/:id`, (req, res) => {
-    db.query(`DELETE FROM ptd_${name} WHERE id = ?`, [req.params.id],
-      (err) => err ? res.status(500).send(err) : res.json({deleted: true})
-    );
+  app.delete(`/api/${name}/:id`, async (req, res) => {
+    try {
+      await db.query(`DELETE FROM ptd_${name} WHERE id = $1`, [req.params.id]);
+      res.json({ deleted: true });
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
   });
 }
 
