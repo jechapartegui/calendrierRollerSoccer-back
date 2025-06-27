@@ -1,4 +1,13 @@
 require('dotenv').config();
+console.log('ENV:', {
+  DB_HOST: process.env.DB_HOST,
+  DB_PORT: process.env.DB_PORT,
+  DB_NAME: process.env.DB_NAME,
+  DB_USER: process.env.DB_USER,
+  DB_PASS: process.env.DB_PASS ? '*****' : '(vide)',
+  DB_SSL: process.env.DB_SSL,
+  PORT: process.env.PORT_APP
+});
 const express = require('express');
 const { Pool } = require('pg'); // 👈 PostgreSQL
 const cors = require('cors');
@@ -8,15 +17,17 @@ app.use(cors());
 app.use(express.json());
 
 
+const useSsl = process.env.DB_SSL === 'true';
+
 const db = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.USERNAME,
-  password: process.env.PASSWORD,
-  database: process.env.DB,
-  port:process.env.PORT,
-   ssl: {
-    rejectUnauthorized: false
-  }
+  host:     process.env.DB_HOST,
+  user:     process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port:     process.env.DB_PORT,
+  ssl:      useSsl
+    ? { rejectUnauthorized: false }
+    : false
 });
 
 // Exemple d'endpoint
@@ -105,13 +116,14 @@ function setupTableRoutes(name, fields) {
 setupTableRoutes('calendrier', ['date_debut','date_fin','pays','motif']);
 setupTableRoutes('categorie', ['nom', 'duree']);
 setupTableRoutes('clubs', ['nom','code','pays']);
-setupTableRoutes('creneau', ['date','heure_debut','heure_fin','club','gymnase']);
+setupTableRoutes('creneau', ['date','heure_debut','heure_fin','club','gymnase', 'notes']);
 setupTableRoutes('equipe_engagee', ['nom','club','categorie']);
 setupTableRoutes('match', ['domicile','exterieur','categorie','club_recevant','creneau_choisi']);
+setupTableRoutes('gymnase', ['nom', 'club']);
 
 
 
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT_APP || 3300;
 app.listen(PORT, () => console.log(`API running on port ${PORT}`));
