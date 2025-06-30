@@ -125,5 +125,5 @@ setupTableRoutes('gymnase', ['nom', 'club']);
 
 
 
-const PORT = process.env.PORT_APP || 3300;
-app.listen(PORT, () => console.log(`API running on port ${PORT}`));
+const leport = process.env.PORT || 3300;
+app.listen(leport, () => console.log(`API running on port ${leport}`));
