@@ -1,11 +1,13 @@
 {
   "name": "calendrier-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Back Pose Ta Date",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node ./index.js",
+    "debug": "node --trace-warnings ./index.js",
+    "dev": "node --watch ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
